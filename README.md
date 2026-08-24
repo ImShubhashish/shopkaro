@@ -7,14 +7,14 @@ A full-stack e-commerce showcase application built with **React**, **Ant Design*
 ## 🌟 Tech Stack
 
 ### Frontend
-- **Framework**: React 18+ (Vite)
+- **Framework**: React 18+ (Vite) + TypeScript (`.tsx`)
 - **UI Library**: Ant Design (`antd`)
 - **Styling**: Tailwind CSS
 - **Routing**: React Router v6
 - **State & Context**: React Context API (Auth, Cart, Wishlist)
 
 ### Backend
-- **Runtime**: Node.js & Express.js
+- **Runtime**: Node.js & Express.js + TypeScript (`.ts`)
 - **Database**: PostgreSQL
 - **ORM**: Prisma ORM
 - **Authentication**: JWT & HTTP-only Cookies, Bcrypt
