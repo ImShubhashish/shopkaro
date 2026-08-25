@@ -2,6 +2,8 @@ import express, { Application, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import healthRouter from './routes/health.routes.js';
+import authRouter from './routes/auth.routes.js';
+import productRouter from './routes/product.routes.js';
 
 dotenv.config();
 
@@ -18,6 +20,9 @@ app.use(express.urlencoded({ extended: true }));
 
 // API Routes
 app.use('/api', healthRouter);
+app.use('/api/auth', authRouter);
+app.use('/api', productRouter);
+
 
 // Base route
 app.get('/', (req: Request, res: Response) => {
