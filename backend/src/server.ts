@@ -3,7 +3,10 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import healthRouter from './routes/health.routes.js';
 import authRouter from './routes/auth.routes.js';
+import userRouter from './routes/user.routes.js';
+import categoryRouter from './routes/category.routes.js';
 import productRouter from './routes/product.routes.js';
+import orderRouter from './routes/order.routes.js';
 
 dotenv.config();
 
@@ -21,7 +24,11 @@ app.use(express.urlencoded({ extended: true }));
 // API Routes
 app.use('/api', healthRouter);
 app.use('/api/auth', authRouter);
+app.use('/api/users', userRouter);
+app.use('/api/categories', categoryRouter);
 app.use('/api', productRouter);
+app.use('/api/orders', orderRouter);
+
 
 
 // Base route
