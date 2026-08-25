@@ -4,6 +4,7 @@ import { Heart, ShoppingBag, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import StarRating from '../common/StarRating';
 import type { Product } from '../../types';
+import { useCart } from '../../context/CartContext';
 
 interface ProductCardProps {
   product: Product;
@@ -21,6 +22,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   isWishlisted = false,
 }) => {
   const [wishlistActive, setWishlistActive] = useState(isWishlisted);
+  const { addToCart } = useCart();
 
   const handleWishlistClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -32,8 +34,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const handleCartClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    addToCart(product);
     onAddToCart?.(product);
   };
+
 
   const originalPrice = Math.round(product.price * (1 + discountPercentage / 100));
 
