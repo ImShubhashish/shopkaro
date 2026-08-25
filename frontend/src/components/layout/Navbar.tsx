@@ -15,6 +15,7 @@ import {
   Settings
 } from 'lucide-react';
 import type { User } from '../../types';
+import CategoryBar from '../home/CategoryBar';
 
 
 interface NavbarProps {
@@ -36,6 +37,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showCategoryBar, setShowCategoryBar] = useState(false);
   const navigate = useNavigate();
 
   const handleSearch = (value: string) => {
@@ -43,6 +45,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       navigate(`/products?search=${encodeURIComponent(value.trim())}`);
     }
   };
+
 
   const userMenuItems: MenuProps['items'] = [
     {
@@ -105,9 +108,17 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Desktop Navigation Links & Actions */}
           <div className="hidden md:flex items-center gap-6">
             <nav className="flex items-center gap-6 font-medium text-sm text-slate-600">
-              <Link to="/products" className="hover:text-indigo-600 transition-colors">Categories</Link>
+              <button 
+                onClick={() => setShowCategoryBar(!showCategoryBar)}
+                className={`hover:text-indigo-600 transition-colors flex items-center gap-1 cursor-pointer ${
+                  showCategoryBar ? 'text-indigo-600 font-bold' : ''
+                }`}
+              >
+                <span>Categories</span>
+              </button>
               <Link to="/products?featured=true" className="hover:text-indigo-600 transition-colors">Deals</Link>
             </nav>
+
 
             <div className="flex items-center gap-3 pl-4 border-l border-slate-200">
               {/* Wishlist Button */}
@@ -146,14 +157,13 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </Button>
                 </Dropdown>
               ) : (
-                <Button 
-                  type="primary" 
-                  shape="round" 
+                <button 
                   onClick={onOpenAuthModal} 
-                  className="bg-indigo-600 hover:bg-indigo-700 shadow-xs px-5"
+                  className="flex items-center gap-2 font-medium text-slate-700 hover:text-indigo-600 transition-colors px-3 py-1.5 rounded-full hover:bg-slate-100 cursor-pointer"
                 >
-                  Sign In
-                </Button>
+                  <UserIcon className="w-5 h-5 text-slate-700" />
+                  <span className="text-base font-normal text-slate-800">Login</span>
+                </button>
               )}
             </div>
           </div>
@@ -181,7 +191,13 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
       </div>
 
+      {/* Conditionally Rendered Category Bar */}
+      {showCategoryBar && (
+        <CategoryBar onSelectCategory={() => setShowCategoryBar(false)} />
+      )}
+
       {/* Mobile Drawer Menu */}
+
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-slate-200 bg-white px-4 pt-3 pb-6 space-y-4 shadow-lg">
           <Input

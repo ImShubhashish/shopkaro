@@ -1,36 +1,21 @@
 import React from 'react';
-import { Card, Button, Tag } from 'antd';
-import { Sparkles, ShoppingBag, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Card } from 'antd';
+import { ShoppingBag } from 'lucide-react';
+import HeroCarousel from '../components/home/HeroCarousel';
+import PromoBannerSection from '../components/home/PromoBannerSection';
+
 
 export const HomePage: React.FC = () => {
   return (
-    <div className="space-y-12">
-      {/* Hero Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-900 via-indigo-800 to-slate-900 text-white p-8 md:p-14 shadow-xl">
-        <div className="relative z-10 max-w-2xl space-y-6">
-          <Tag color="indigo" className="bg-indigo-500/20 border-indigo-400/30 text-indigo-200 px-3 py-1 text-sm rounded-full inline-flex items-center gap-1">
-            <Sparkles className="w-3.5 h-3.5" /> Festive Special Offer
-          </Tag>
-          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-tight">
-            Upgrade Your Lifestyle with ShopKaro
-          </h1>
-          <p className="text-indigo-200 text-base md:text-lg leading-relaxed">
-            Discover top-tier electronics, fashion, and accessories with free express shipping across India.
-          </p>
-          <div className="pt-2 flex flex-wrap gap-4">
-            <Link to="/products">
-              <Button type="primary" size="large" shape="round" className="bg-indigo-600 hover:bg-indigo-500 h-12 px-8 font-semibold text-base flex items-center gap-2">
-                <span>Shop Catalog Now</span>
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-            </Link>
-          </div>
-        </div>
+    <div className="space-y-8">
+      {/* Hero Offer Carousel */}
+      <HeroCarousel />
 
-        {/* Decorative Circles */}
-        <div className="absolute -right-16 -bottom-16 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-      </div>
+
+      {/* 3-Column Promo Banner Grid */}
+      <PromoBannerSection />
+
+
 
       {/* Featured Categories Quick Nav */}
       <div className="space-y-4">

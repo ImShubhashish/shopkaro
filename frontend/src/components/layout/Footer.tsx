@@ -101,7 +101,7 @@ export const Footer: React.FC = () => {
           <div className="flex items-center gap-1">
             <span>Crafted with</span>
             <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500 inline" />
-            <span>for Full-Stack Portfolio Showcase</span>
+            <span>by Shubhashish Bhattacharya</span>
           </div>
         </div>
 
