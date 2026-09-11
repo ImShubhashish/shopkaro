@@ -7,7 +7,9 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
+
 
 enum Role {
   USER
@@ -23,15 +25,16 @@ enum OrderStatus {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
+  id        String     @id @default(uuid())
+  email     String     @unique
   name      String
   password  String
-  role      Role     @default(USER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  role      Role       @default(USER)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
   orders    Order[]
   reviews   Review[]
+  wishlist  Wishlist[]
 }
 
 model Category {
@@ -56,7 +59,20 @@ model Product {
   updatedAt   DateTime    @updatedAt
   orderItems  OrderItem[]
   reviews     Review[]
+  wishlist    Wishlist[]
 }
+
+model Wishlist {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+}
+
 
 model Review {
   id        String   @id @default(uuid())

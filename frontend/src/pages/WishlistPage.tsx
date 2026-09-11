@@ -1,23 +1,45 @@
-import React, { useState } from 'react';
-import { Breadcrumb, Card, Table, Button, Empty } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Breadcrumb, Card, Table, Button, Empty, Spin } from 'antd';
 import { Home, Heart, ShoppingBag, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { mockProducts } from '../data/mockProducts';
 import { useCart } from '../context/CartContext';
+import api from '../api/client';
 import type { Product } from '../types';
 
 export const WishlistPage: React.FC = () => {
-  const [wishlistItems, setWishlistItems] = useState<Product[]>([mockProducts[0], mockProducts[2]]);
+  const [wishlistItems, setWishlistItems] = useState<Product[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const { addToCart } = useCart();
 
-  const handleRemoveFromWishlist = (id: string) => {
+  useEffect(() => {
+    const fetchWishlist = async () => {
+      setLoading(true);
+      try {
+        const res = await api.get('/wishlist');
+        setWishlistItems(res.data.data.products || []);
+      } catch {
+        setWishlistItems([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchWishlist();
+  }, []);
+
+  const handleRemoveFromWishlist = async (id: string) => {
     setWishlistItems((prev) => prev.filter((item) => item.id !== id));
+    try {
+      await api.delete(`/wishlist/${id}`);
+    } catch {
+      // Ignored
+    }
   };
 
   const handleMoveToCart = (product: Product) => {
     addToCart(product);
     handleRemoveFromWishlist(product.id);
   };
+
 
 
   const columns = [
@@ -90,7 +112,9 @@ export const WishlistPage: React.FC = () => {
       </div>
 
       {/* Wishlist Table or Empty State */}
-      {wishlistItems.length > 0 ? (
+      {loading ? (
+        <div className="py-20 text-center"><Spin size="large" /></div>
+      ) : wishlistItems.length > 0 ? (
         <Card className="rounded-3xl border-slate-200 shadow-xs overflow-hidden">
           <Table columns={columns} dataSource={wishlistItems} rowKey="id" pagination={false} size="middle" />
         </Card>
@@ -104,6 +128,7 @@ export const WishlistPage: React.FC = () => {
           </Link>
         </div>
       )}
+
     </div>
   );
 };

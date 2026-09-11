@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import FilterSidebar from '../components/catalog/FilterSidebar';
 import CatalogToolbar from '../components/catalog/CatalogToolbar';
@@ -7,12 +7,15 @@ import ProductSkeleton from '../components/product/ProductSkeleton';
 import { mockProducts } from '../data/mockProducts';
 import { Empty, Breadcrumb } from 'antd';
 import { Home } from 'lucide-react';
+import api from '../api/client';
+import type { Product } from '../types';
 
 export const CatalogPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const initialCategory = searchParams.get('category') || 'all';
   const initialSearch = searchParams.get('search') || '';
 
+  const [products, setProducts] = useState<Product[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory);
   const [searchQuery, setSearchQuery] = useState<string>(initialSearch);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 50000]);
@@ -20,7 +23,23 @@ export const CatalogPage: React.FC = () => {
   const [inStockOnly, setInStockOnly] = useState<boolean>(false);
   const [sortBy, setSortBy] = useState<string>('featured');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [loading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      try {
+        const res = await api.get('/products');
+        setProducts(res.data.data.products || []);
+      } catch {
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
 
   const categories = [
     { id: 'electronics', name: 'Electronics' },
@@ -31,7 +50,7 @@ export const CatalogPage: React.FC = () => {
 
   // Filter & Sort Logic
   const filteredProducts = useMemo(() => {
-    return mockProducts
+    return products
       .filter((p) => {
         if (selectedCategory !== 'all' && p.categoryId !== selectedCategory) return false;
         if (searchQuery.trim() && !p.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
@@ -46,7 +65,8 @@ export const CatalogPage: React.FC = () => {
         if (sortBy === 'rating') return b.rating - a.rating;
         return 0;
       });
-  }, [selectedCategory, searchQuery, priceRange, minRating, inStockOnly, sortBy]);
+  }, [products, selectedCategory, searchQuery, priceRange, minRating, inStockOnly, sortBy]);
+
 
   const handleResetFilters = () => {
     setSelectedCategory('all');

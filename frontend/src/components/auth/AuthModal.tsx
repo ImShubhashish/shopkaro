@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, Form, Input, Button, Tabs, Select, message } from 'antd';
-
 import { Mail, Lock, User as UserIcon, ShoppingBag, ArrowRight, Phone } from 'lucide-react';
-
+import api from '../../api/client';
 
 interface AuthModalProps {
   open: boolean;
@@ -22,46 +21,50 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [loginForm] = Form.useForm();
   const [registerForm] = Form.useForm();
 
+
   const handleLoginSubmit = async (values: { email: string; password: string }) => {
     setLoading(true);
     try {
-      // Temporary client auth mock (Will connect to Express Backend Day 6 / Auth Backend API)
-      setTimeout(() => {
-        setLoading(false);
-        message.success('Successfully logged into ShopKaro!');
-        onLoginSuccess?.({
-          name: values.email.split('@')[0],
-          email: values.email,
-          token: 'mock-jwt-token-12345',
-        });
-        loginForm.resetFields();
-        onClose();
-      }, 1000);
-    } catch {
+      const res = await api.post('/auth/login', {
+        email: values.email,
+        password: values.password,
+      });
+      const { user, token } = res.data.data;
+      localStorage.setItem('shopkaro_token', token);
+      message.success(`Welcome back, ${user.name}!`);
+      onLoginSuccess?.({ name: user.name, email: user.email, token });
+      loginForm.resetFields();
+      onClose();
+    } catch (error: any) {
+      const errorMsg = error.response?.data?.message || 'Login failed. Please check credentials.';
+      message.error(errorMsg);
+    } finally {
       setLoading(false);
-      message.error('Failed to log in. Please check your credentials.');
     }
   };
 
   const handleRegisterSubmit = async (values: { name: string; email: string; password: string }) => {
     setLoading(true);
     try {
-      setTimeout(() => {
-        setLoading(false);
-        message.success('Account created successfully! Welcome to ShopKaro.');
-        onLoginSuccess?.({
-          name: values.name,
-          email: values.email,
-          token: 'mock-jwt-token-67890',
-        });
-        registerForm.resetFields();
-        onClose();
-      }, 1000);
-    } catch {
+      const res = await api.post('/auth/register', {
+        name: values.name,
+        email: values.email,
+        password: values.password,
+      });
+      const { user, token } = res.data.data;
+      localStorage.setItem('shopkaro_token', token);
+      message.success('Account created successfully! Welcome to ShopKaro.');
+      onLoginSuccess?.({ name: user.name, email: user.email, token });
+      registerForm.resetFields();
+      onClose();
+    } catch (error: any) {
+      const errorMsg = error.response?.data?.message || 'Failed to register account.';
+      message.error(errorMsg);
+    } finally {
       setLoading(false);
-      message.error('Failed to register account.');
     }
   };
+
 
   return (
     <Modal

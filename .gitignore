@@ -115,3 +115,13 @@ dist
 # IDEs
 .vscode/
 .idea/
+
+# Build and Prisma local databases
+dist/
+build/
+*.db
+*.db-journal
+*.sqlite
+*.sqlite-journal
+prisma/dev.db
+

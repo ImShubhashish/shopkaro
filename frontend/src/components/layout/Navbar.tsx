@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Badge, Button, Input, Dropdown } from 'antd';
 import type { MenuProps } from 'antd';
 import { 
@@ -39,12 +39,16 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showCategoryBar, setShowCategoryBar] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const isCatalogPage = location.pathname === '/products';
 
   const handleSearch = (value: string) => {
     if (value.trim()) {
       navigate(`/products?search=${encodeURIComponent(value.trim())}`);
     }
   };
+
 
 
   const userMenuItems: MenuProps['items'] = [
@@ -92,18 +96,23 @@ export const Navbar: React.FC<NavbarProps> = ({
             </span>
           </Link>
 
-          {/* Search Input Bar (Desktop) */}
-          <div className="hidden md:flex flex-1 max-w-md mx-4">
-            <Input
-              placeholder="Search products, brands, categories..."
-              prefix={<Search className="w-4 h-4 text-slate-400 mr-1" />}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onPressEnter={() => handleSearch(searchQuery)}
-              className="rounded-full bg-slate-100/80 border-slate-200 hover:border-indigo-400 focus:border-indigo-500 py-1.5"
-              allowClear
-            />
-          </div>
+          {/* Search Input Bar (Desktop) - Hidden on /products Catalog Page */}
+          {!isCatalogPage ? (
+            <div className="hidden md:flex flex-1 max-w-md mx-4">
+              <Input
+                placeholder="Search products, brands, categories..."
+                prefix={<Search className="w-4 h-4 text-slate-400 mr-1" />}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onPressEnter={() => handleSearch(searchQuery)}
+                className="rounded-full bg-slate-100/80 border-slate-200 hover:border-indigo-400 focus:border-indigo-500 py-1.5"
+                allowClear
+              />
+            </div>
+          ) : (
+            <div className="flex-1" />
+          )}
+
 
           {/* Desktop Navigation Links & Actions */}
           <div className="hidden md:flex items-center gap-6">

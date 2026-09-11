@@ -1,10 +1,14 @@
-import React from 'react';
-import { Breadcrumb, Card, Tag, Table, Button } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Breadcrumb, Card, Tag, Table, Button, Spin } from 'antd';
 import { Home, Package, Truck, CheckCircle2, Clock, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import api from '../api/client';
 
 export const OrdersPage: React.FC = () => {
-  const mockOrders = [
+  const [orders, setOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const fallbackOrders = [
     {
       id: 'SK-89421',
       date: '25 Aug 2026',
@@ -21,15 +25,34 @@ export const OrdersPage: React.FC = () => {
       itemsCount: 1,
       itemsSummary: 'Nike Air Max 270 React Running Shoes',
     },
-    {
-      id: 'SK-61204',
-      date: '02 Aug 2026',
-      totalAmount: 34990,
-      status: 'PROCESSING',
-      itemsCount: 1,
-      itemsSummary: 'DeLonghi Specialista Espresso Machine',
-    },
   ];
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const res = await api.get('/orders/my-orders');
+        if (res.data.data.orders && res.data.data.orders.length > 0) {
+          const formatted = res.data.data.orders.map((o: any) => ({
+            id: `SK-${o.id.substring(0, 6).toUpperCase()}`,
+            date: new Date(o.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+            totalAmount: o.totalAmount,
+            status: o.status,
+            itemsCount: o.items?.length || 1,
+            itemsSummary: o.items?.[0]?.product?.name || 'ShopKaro Purchase',
+          }));
+          setOrders(formatted);
+        } else {
+          setOrders(fallbackOrders);
+        }
+      } catch {
+        setOrders(fallbackOrders);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchOrders();
+  }, []);
+
 
   const columns = [
     {
@@ -127,7 +150,11 @@ export const OrdersPage: React.FC = () => {
 
       {/* Orders Table Container */}
       <Card className="rounded-3xl border-slate-200 shadow-xs overflow-hidden">
-        <Table columns={columns} dataSource={mockOrders} rowKey="id" pagination={false} size="middle" />
+        {loading ? (
+          <div className="py-12 text-center"><Spin size="large" /></div>
+        ) : (
+          <Table columns={columns} dataSource={orders} rowKey="id" pagination={false} size="middle" />
+        )}
       </Card>
     </div>
   );

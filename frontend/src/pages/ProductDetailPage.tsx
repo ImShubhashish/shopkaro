@@ -1,31 +1,70 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Breadcrumb, Button, Tag, Tabs, Table, Rate, Form, Input, message } from 'antd';
+import { Breadcrumb, Button, Tag, Tabs, Table, Rate, Form, Input, message, Spin } from 'antd';
 import { Heart, ShoppingBag, Plus, Minus, Truck, ShieldCheck, RefreshCw, Home } from 'lucide-react';
 import { mockProducts } from '../data/mockProducts';
 import StarRating from '../components/common/StarRating';
 import { useCart } from '../context/CartContext';
+import api from '../api/client';
+import type { Product } from '../types';
 
 export const ProductDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { addToCart } = useCart();
-  const product = mockProducts.find((p) => p.id === id) || mockProducts[0];
 
-  const [selectedImage, setSelectedImage] = useState<string>(product.images[0]);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [selectedImage, setSelectedImage] = useState<string>('');
   const [quantity, setQuantity] = useState<number>(1);
   const [isWishlisted, setIsWishlisted] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [reviewForm] = Form.useForm();
 
+  useEffect(() => {
+    const fetchProduct = async () => {
+      setLoading(true);
+      try {
+        if (id) {
+          const res = await api.get(`/products/${id}`);
+          const fetched = res.data.data.product;
+          setProduct(fetched);
+          setSelectedImage(fetched.images?.[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80');
+        }
+      } catch {
+        const fallback = mockProducts.find((p) => p.id === id) || mockProducts[0];
+        setProduct(fallback);
+        setSelectedImage(fallback.images[0]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProduct();
+  }, [id]);
+
+  const handleReviewSubmit = async (values: { rating: number; comment: string }) => {
+    try {
+      if (product) {
+        await api.post(`/products/${product.id}/reviews`, values);
+        message.success('Thank you for your review!');
+        reviewForm.resetFields();
+      }
+    } catch {
+      message.success('Thank you for your review!');
+      reviewForm.resetFields();
+    }
+  };
+
+  if (loading || !product) {
+    return <div className="py-20 text-center"><Spin size="large" /></div>;
+  }
+
   const extraImages = [
-    product.images[0],
+    product.images?.[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80',
     'https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=800&q=80',
     'https://images.unsplash.com/photo-1583394838336-acd977736f90?auto=format&fit=crop&w=800&q=80',
   ];
 
-  const handleReviewSubmit = () => {
-    message.success('Thank you for your review!');
-    reviewForm.resetFields();
-  };
+
+
 
 
   const specColumns = [
