@@ -42,10 +42,17 @@ export const CatalogPage: React.FC = () => {
 
 
   const categories = [
-    { id: 'electronics', name: 'Electronics' },
     { id: 'fashion', name: 'Fashion' },
-    { id: 'home', name: 'Home & Living' },
+    { id: 'mobiles', name: 'Mobiles' },
+    { id: 'electronics', name: 'Electronics' },
     { id: 'beauty', name: 'Beauty & Personal Care' },
+    { id: 'home', name: 'Home & Living' },
+    { id: 'appliances', name: 'Appliances' },
+    { id: 'toys', name: 'Toys & Kids' },
+    { id: 'health', name: 'Health & Care' },
+    { id: 'furniture', name: 'Furniture' },
+    { id: 'books', name: 'Books' },
+    { id: '2wheelers', name: '2 Wheelers' },
   ];
 
   // Filter & Sort Logic
