@@ -5,6 +5,7 @@ import Footer from './Footer';
 import AuthModal from '../auth/AuthModal';
 import CartDrawer from '../cart/CartDrawer';
 import { useCart } from '../../context/CartContext';
+import { useWishlist } from '../../context/WishlistContext';
 import type { User } from '../../types';
 
 interface AppLayoutProps {
@@ -21,18 +22,19 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
   const { totalItems } = useCart();
+  const { wishlistCount } = useWishlist();
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans antialiased selection:bg-indigo-500 selection:text-white">
-      {/* Sticky Header */}
       <Navbar
         cartCount={totalItems}
-        wishlistCount={1}
+        wishlistCount={wishlistCount}
         user={user}
         onOpenAuthModal={() => setAuthModalOpen(true)}
         onOpenCartDrawer={() => setCartDrawerOpen(true)}
         onLogout={onLogout}
       />
+
 
       {/* Main Page View Outlet */}
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

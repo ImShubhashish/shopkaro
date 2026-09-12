@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Breadcrumb, Card, Table, Button, Empty, Spin } from 'antd';
+import { Breadcrumb, Card, Table, Button, Empty, Skeleton } from 'antd';
 import { Home, Heart, ShoppingBag, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
 import api from '../api/client';
 import type { Product } from '../types';
 
@@ -10,13 +11,25 @@ export const WishlistPage: React.FC = () => {
   const [wishlistItems, setWishlistItems] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const { addToCart } = useCart();
+  const { toggleWishlist, wishlistItems: wishlistedIds } = useWishlist();
 
   useEffect(() => {
     const fetchWishlist = async () => {
       setLoading(true);
       try {
         const res = await api.get('/wishlist');
-        setWishlistItems(res.data.data.products || []);
+        const prods = res.data.data.products || [];
+        if (prods.length > 0) {
+          setWishlistItems(prods);
+        } else if (wishlistedIds.length > 0) {
+          // Fetch products from catalog endpoint to display matched wishlisted items
+          const catRes = await api.get('/products');
+          const allProds: Product[] = catRes.data.data.products || [];
+          const matched = allProds.filter((p) => wishlistedIds.includes(p.id));
+          setWishlistItems(matched);
+        } else {
+          setWishlistItems([]);
+        }
       } catch {
         setWishlistItems([]);
       } finally {
@@ -24,16 +37,13 @@ export const WishlistPage: React.FC = () => {
       }
     };
     fetchWishlist();
-  }, []);
+  }, [wishlistedIds.length]);
 
   const handleRemoveFromWishlist = async (id: string) => {
+    await toggleWishlist(id);
     setWishlistItems((prev) => prev.filter((item) => item.id !== id));
-    try {
-      await api.delete(`/wishlist/${id}`);
-    } catch {
-      // Ignored
-    }
   };
+
 
   const handleMoveToCart = (product: Product) => {
     addToCart(product);
@@ -105,15 +115,19 @@ export const WishlistPage: React.FC = () => {
         <div>
           <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
             <Heart className="w-7 h-7 text-rose-500 fill-rose-500" />
-            <span>My Wishlist ({wishlistItems.length})</span>
+            <span>My Wishlist{wishlistItems.length > 0 ? ` (${wishlistItems.length})` : ''}</span>
           </h1>
-          <p className="text-sm text-slate-500 mt-1">Saved items you want to buy later</p>
+          <p className="text-sm text-slate-500 mt-1">Your personal wishlist — saved products waiting for your next purchase</p>
+
         </div>
       </div>
 
-      {/* Wishlist Table or Empty State */}
+
+      {/* Wishlist Table or Skeleton Loading or Empty State */}
       {loading ? (
-        <div className="py-20 text-center"><Spin size="large" /></div>
+        <Card className="rounded-3xl border-slate-200 shadow-xs p-6">
+          <Skeleton active paragraph={{ rows: 6 }} title={{ width: '30%' }} />
+        </Card>
       ) : wishlistItems.length > 0 ? (
         <Card className="rounded-3xl border-slate-200 shadow-xs overflow-hidden">
           <Table columns={columns} dataSource={wishlistItems} rowKey="id" pagination={false} size="middle" />
