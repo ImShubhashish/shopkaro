@@ -21,6 +21,10 @@ router.post('/register', async (req: Request, res: Response) => {
     try {
       existingUser = await prisma.user.findUnique({ where: { email } });
     } catch {
+      // Database not reachable
+    }
+
+    if (!existingUser) {
       existingUser = inMemoryUsers.find((u) => u.email === email);
     }
 
@@ -38,7 +42,8 @@ router.post('/register', async (req: Request, res: Response) => {
       inMemoryUsers.push(newUser);
     }
 
-    const token = jwt.encode({ id: newUser.id, role: newUser.role }, JWT_SECRET);
+    const exp = Date.now() + 5 * 60 * 1000;
+    const token = jwt.encode({ id: newUser.id, role: newUser.role, exp }, JWT_SECRET);
 
     res.status(201).json({
       status: 'success',
@@ -67,6 +72,10 @@ router.post('/login', async (req: Request, res: Response) => {
     try {
       user = await prisma.user.findUnique({ where: { email } });
     } catch {
+      // Database not reachable
+    }
+
+    if (!user) {
       user = inMemoryUsers.find((u) => u.email === email);
     }
 
@@ -79,7 +88,8 @@ router.post('/login', async (req: Request, res: Response) => {
       return res.status(401).json({ status: 'error', message: 'Invalid credentials' });
     }
 
-    const token = jwt.encode({ id: user.id, role: user.role }, JWT_SECRET);
+    const exp = Date.now() + 5 * 60 * 1000;
+    const token = jwt.encode({ id: user.id, role: user.role, exp }, JWT_SECRET);
 
     res.status(200).json({
       status: 'success',
@@ -99,5 +109,61 @@ router.post('/login', async (req: Request, res: Response) => {
   }
 });
 
+// GET /api/auth/me - Fetch current user profile
+router.get('/me', async (req: Request, res: Response) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ status: 'error', message: 'No token provided' });
+  }
+
+  try {
+    const decoded = jwt.decode(token, JWT_SECRET);
+    if (decoded.exp && Date.now() >= decoded.exp) {
+      return res.status(401).json({ status: 'error', message: 'Session expired' });
+    }
+
+    let user = null;
+    try {
+      user = await prisma.user.findUnique({ where: { id: decoded.id } });
+    } catch {
+      user = inMemoryUsers.find((u) => u.id === decoded.id);
+    }
+
+    if (!user) {
+      return res.status(404).json({ status: 'error', message: 'User not found' });
+    }
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        user: { id: user.id, name: user.name, email: user.email, role: user.role },
+      },
+    });
+  } catch {
+    res.status(401).json({ status: 'error', message: 'Invalid token' });
+  }
+});
+
+
+// POST /api/auth/reset - Clear all user records and wishlist for testing
+router.post('/reset', async (_req: Request, res: Response) => {
+  try {
+    inMemoryUsers.length = 0;
+    try {
+      await prisma.wishlist.deleteMany({});
+      await prisma.orderItem.deleteMany({});
+      await prisma.order.deleteMany({});
+      await prisma.review.deleteMany({});
+      await prisma.user.deleteMany({});
+    } catch {
+      // Ignored if DB not connected
+    }
+    res.status(200).json({ status: 'success', message: 'All user credentials and wishlist data cleared' });
+  } catch (error: any) {
+    res.status(500).json({ status: 'error', message: error.message || 'Failed to reset' });
+  }
+});
 
 export default router;

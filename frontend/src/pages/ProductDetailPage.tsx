@@ -5,6 +5,7 @@ import { Heart, ShoppingBag, Plus, Minus, Truck, ShieldCheck, RefreshCw, Home } 
 import { mockProducts } from '../data/mockProducts';
 import StarRating from '../components/common/StarRating';
 import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
 import api from '../api/client';
 import type { Product } from '../types';
 
@@ -15,7 +16,14 @@ export const ProductDetailPage: React.FC = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [selectedImage, setSelectedImage] = useState<string>('');
   const [quantity, setQuantity] = useState<number>(1);
-  const [isWishlisted, setIsWishlisted] = useState<boolean>(false);
+  const { toggleWishlist, isProductWishlisted } = useWishlist();
+  const isWishlisted = product ? isProductWishlisted(product.id) : false;
+
+  const handleWishlistToggle = async () => {
+    if (product) {
+      await toggleWishlist(product.id);
+    }
+  };
   const [loading, setLoading] = useState<boolean>(true);
   const [reviewForm] = Form.useForm();
 
@@ -189,7 +197,7 @@ export const ProductDetailPage: React.FC = () => {
 
               <Button
                 size="large"
-                onClick={() => setIsWishlisted(!isWishlisted)}
+                onClick={handleWishlistToggle}
                 className={`h-13 rounded-2xl px-5 border-slate-300 flex items-center justify-center ${
                   isWishlisted ? 'bg-rose-50 border-rose-300 text-rose-600' : 'text-slate-700'
                 }`}

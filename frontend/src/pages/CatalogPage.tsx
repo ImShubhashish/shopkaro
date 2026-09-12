@@ -4,9 +4,9 @@ import FilterSidebar from '../components/catalog/FilterSidebar';
 import CatalogToolbar from '../components/catalog/CatalogToolbar';
 import ProductCard from '../components/product/ProductCard';
 import ProductSkeleton from '../components/product/ProductSkeleton';
-import { mockProducts } from '../data/mockProducts';
 import { Empty, Breadcrumb } from 'antd';
 import { Home } from 'lucide-react';
+
 import api from '../api/client';
 import type { Product } from '../types';
 

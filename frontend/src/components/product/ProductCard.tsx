@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, Tag, Button, Tooltip } from 'antd';
 import { Heart, ShoppingBag, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import StarRating from '../common/StarRating';
 import type { Product } from '../../types';
 import { useCart } from '../../context/CartContext';
+import { useWishlist } from '../../context/WishlistContext';
 
 interface ProductCardProps {
   product: Product;
@@ -19,15 +20,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   discountPercentage = 15,
   onAddToCart,
   onToggleWishlist,
-  isWishlisted = false,
+  isWishlisted,
 }) => {
-  const [wishlistActive, setWishlistActive] = useState(isWishlisted);
   const { addToCart } = useCart();
+  const { toggleWishlist, isProductWishlisted } = useWishlist();
 
-  const handleWishlistClick = (e: React.MouseEvent) => {
+  const activeInWishlist = isWishlisted !== undefined ? isWishlisted : isProductWishlisted(product.id);
+
+  const handleWishlistClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setWishlistActive(!wishlistActive);
+    await toggleWishlist(product.id);
     onToggleWishlist?.(product);
   };
 
@@ -71,16 +74,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
         {/* Floating Action Buttons (Wishlist Heart & Quick View) */}
         <div className="absolute top-2.5 right-2.5 flex flex-col gap-2 z-10">
-          <Tooltip title={wishlistActive ? 'Remove from Wishlist' : 'Add to Wishlist'}>
+          <Tooltip title={activeInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}>
             <button
               onClick={handleWishlistClick}
               className={`p-2 rounded-full backdrop-blur-md transition-all shadow-md cursor-pointer ${
-                wishlistActive
+                activeInWishlist
                   ? 'bg-rose-500 text-white'
                   : 'bg-white/90 text-slate-600 hover:bg-rose-50 hover:text-rose-600'
               }`}
             >
-              <Heart className={`w-4 h-4 ${wishlistActive ? 'fill-white' : ''}`} />
+              <Heart className={`w-4 h-4 ${activeInWishlist ? 'fill-white' : ''}`} />
             </button>
           </Tooltip>
         </div>
