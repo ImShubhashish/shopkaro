@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -16,7 +17,7 @@ const categoryDefs = [
   { name: '2 Wheelers', slug: '2wheelers' },
 ];
 
-const categoryImagePool = {
+const categoryImagePool: Record<string, string[]> = {
   'fashion': [
     'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80',
     'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=800&q=80',
