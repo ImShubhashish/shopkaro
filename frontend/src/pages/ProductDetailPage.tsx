@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Breadcrumb, Button, Tag, Tabs, Table, Rate, Form, Input, message, Spin } from 'antd';
 import { Heart, ShoppingBag, Plus, Minus, Truck, ShieldCheck, RefreshCw, Home } from 'lucide-react';
-import { mockProducts } from '../data/mockProducts';
+
 import StarRating from '../components/common/StarRating';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
@@ -38,9 +38,7 @@ export const ProductDetailPage: React.FC = () => {
           setSelectedImage(fetched.images?.[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80');
         }
       } catch {
-        const fallback = mockProducts.find((p) => p.id === id) || mockProducts[0];
-        setProduct(fallback);
-        setSelectedImage(fallback.images[0]);
+        setProduct(null);
       } finally {
         setLoading(false);
       }

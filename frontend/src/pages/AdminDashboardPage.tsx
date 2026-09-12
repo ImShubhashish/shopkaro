@@ -1,15 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Breadcrumb, Card, Table, Button, Modal, Form, Input, InputNumber, Select, Tag, Space, message } from 'antd';
 import { Home, Settings, Plus, Edit, Trash2, DollarSign, Package, ShoppingBag } from 'lucide-react';
-
-import { mockProducts } from '../data/mockProducts';
+import api from '../api/client';
 import type { Product } from '../types';
 
 export const AdminDashboardPage: React.FC = () => {
-  const [products, setProducts] = useState<Product[]>(mockProducts);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [form] = Form.useForm();
+
+  const fetchProducts = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get('/products');
+      setProducts(res.data.data.products || []);
+    } catch {
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
   const handleOpenAddModal = () => {
     setEditingProduct(null);
@@ -30,46 +46,44 @@ export const AdminDashboardPage: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleDeleteProduct = (id: string) => {
-    setProducts((prev) => prev.filter((p) => p.id !== id));
-    message.success('Product deleted from inventory');
+  const handleDeleteProduct = async (id: string) => {
+    try {
+      await api.delete(`/products/${id}`);
+      setProducts((prev) => prev.filter((p) => p.id !== id));
+      message.success('Product deleted from inventory');
+    } catch (err: any) {
+      message.error(err.response?.data?.message || 'Failed to delete product');
+    }
   };
 
-  const handleFormSubmit = (values: any) => {
-    if (editingProduct) {
-      setProducts((prev) =>
-        prev.map((p) =>
-          p.id === editingProduct.id
-            ? {
-                ...p,
-                name: values.name,
-                description: values.description,
-                price: values.price,
-                stock: values.stock,
-                categoryId: values.categoryId,
-                images: [values.image || p.images[0]],
-              }
-            : p
-        )
-      );
-      message.success('Product updated successfully');
-    } else {
-      const newProduct: Product = {
-        id: `prod-${Date.now()}`,
-        name: values.name,
-        description: values.description,
-        price: values.price,
-        stock: values.stock,
-        rating: 5.0,
-        numReviews: 0,
-        categoryId: values.categoryId,
-        category: { id: values.categoryId, name: values.categoryId.toUpperCase(), slug: values.categoryId },
-        images: [values.image || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80'],
-      };
-      setProducts((prev) => [newProduct, ...prev]);
-      message.success('New product added to inventory');
+  const handleFormSubmit = async (values: any) => {
+    try {
+      if (editingProduct) {
+        await api.put(`/products/${editingProduct.id}`, {
+          name: values.name,
+          description: values.description,
+          price: values.price,
+          stock: values.stock,
+          categoryId: values.categoryId,
+          images: [values.image || editingProduct.images[0]],
+        });
+        message.success('Product updated successfully');
+      } else {
+        await api.post('/products', {
+          name: values.name,
+          description: values.description,
+          price: values.price,
+          stock: values.stock,
+          categoryId: values.categoryId,
+          images: [values.image || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80'],
+        });
+        message.success('New product added to inventory');
+      }
+      fetchProducts();
+      setIsModalOpen(false);
+    } catch (err: any) {
+      message.error(err.response?.data?.message || 'Failed to save product');
     }
-    setIsModalOpen(false);
   };
 
   const totalRevenue = products.reduce((acc, p) => acc + p.price * 15, 0);
@@ -197,7 +211,7 @@ export const AdminDashboardPage: React.FC = () => {
         <div className="flex items-center justify-between pb-4">
           <h3 className="font-bold text-slate-900 text-base">Product Inventory Catalog</h3>
         </div>
-        <Table columns={columns} dataSource={products} rowKey="id" pagination={{ pageSize: 5 }} size="middle" />
+        <Table columns={columns} dataSource={products} rowKey="id" loading={loading} pagination={{ pageSize: 8 }} size="middle" />
       </Card>
 
       {/* Product Create / Edit Modal */}

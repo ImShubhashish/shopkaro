@@ -1,20 +1,37 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from 'antd';
 import { ShoppingBag } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import HeroCarousel from '../components/home/HeroCarousel';
 import PromoBannerSection from '../components/home/PromoBannerSection';
 import ProductCard from '../components/product/ProductCard';
-import { mockProducts } from '../data/mockProducts';
+import ProductSkeleton from '../components/product/ProductSkeleton';
+import api from '../api/client';
 
 
 
 export const HomePage: React.FC = () => {
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await api.get('/products');
+        setProducts(res.data.data.products || []);
+      } catch {
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
   return (
     <div className="space-y-8">
       {/* Hero Offer Carousel */}
       <HeroCarousel />
-
 
       {/* 3-Column Promo Banner Grid */}
       <PromoBannerSection />
@@ -32,13 +49,15 @@ export const HomePage: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {mockProducts.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              discountPercentage={product.id === 'prod-1' ? 20 : product.id === 'prod-3' ? 25 : 15}
-            />
-          ))}
+          {loading
+            ? Array.from({ length: 8 }).map((_, idx) => <ProductSkeleton key={idx} />)
+            : products.slice(0, 8).map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  discountPercentage={product.id === 'prod-1' ? 20 : product.id === 'prod-3' ? 25 : 15}
+                />
+              ))}
         </div>
       </div>
 
