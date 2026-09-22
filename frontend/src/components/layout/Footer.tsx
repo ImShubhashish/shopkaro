@@ -1,9 +1,53 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingBag, Heart, ShieldCheck, Truck, RefreshCw, Mail } from 'lucide-react';
-import { Input, Button } from 'antd';
+import { ShoppingBag, Heart, ShieldCheck, Truck, RefreshCw, Mail, CheckCircle2 } from 'lucide-react';
+import { Input, Button, notification } from 'antd';
 
 export const Footer: React.FC = () => {
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubscribe = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const trimmedEmail = email.trim();
+
+    if (!trimmedEmail) {
+      notification.warning({
+        message: <span className="font-bold text-slate-900">Email Required</span>,
+        description: 'Please enter a valid email address to subscribe for offers.',
+        placement: 'bottomRight',
+      });
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      notification.error({
+        message: <span className="font-bold text-slate-900">Invalid Email</span>,
+        description: 'Please enter a valid email address (e.g. user@example.com).',
+        placement: 'bottomRight',
+      });
+      return;
+    }
+
+    setLoading(true);
+
+    setTimeout(() => {
+      setLoading(false);
+      setEmail('');
+      notification.success({
+        message: <span className="font-bold text-slate-900 leading-tight">Subscription Successful! 🎉</span>,
+        description: `Thank you for joining! We've sent a $10 discount code and welcome gift to ${trimmedEmail}.`,
+        icon: (
+          <div className="flex items-center h-6">
+            <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+          </div>
+        ),
+        placement: 'bottomRight',
+        duration: 5,
+      });
+    }, 600);
+  };
   return (
     <footer className="bg-slate-900 text-slate-300 pt-12 pb-8 border-t border-slate-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -83,14 +127,23 @@ export const Footer: React.FC = () => {
           <div className="space-y-3">
             <h5 className="font-semibold text-white text-sm tracking-wider uppercase">Subscribe for Offers</h5>
             <p className="text-xs text-slate-400">Get $10 off your first purchase and exclusive sales alerts.</p>
-            <div className="flex gap-2">
+            <form onSubmit={handleSubscribe} className="flex gap-2">
               <Input 
                 placeholder="Enter your email..." 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 prefix={<Mail className="w-4 h-4 text-slate-500 mr-1" />}
                 className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 rounded-lg"
               />
-              <Button type="primary" className="bg-indigo-600 hover:bg-indigo-700 rounded-lg">Join</Button>
-            </div>
+              <Button 
+                type="primary" 
+                htmlType="submit"
+                loading={loading}
+                className="bg-indigo-600 hover:bg-indigo-700 rounded-lg font-semibold"
+              >
+                Join
+              </Button>
+            </form>
           </div>
 
         </div>
