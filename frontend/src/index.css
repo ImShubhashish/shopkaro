@@ -4,4 +4,19 @@
   body {
     @apply bg-slate-50 text-slate-900 font-sans antialiased;
   }
+
+  .ant-breadcrumb {
+    margin-bottom: 16px !important;
+  }
+
+  .ant-breadcrumb li {
+    display: inline-flex !important;
+    align-items: center !important;
+  }
+
+  .ant-breadcrumb-link a, .ant-breadcrumb-link span {
+    display: inline-flex !important;
+    align-items: center !important;
+  }
 }
+

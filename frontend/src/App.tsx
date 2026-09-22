@@ -10,6 +10,9 @@ import OrdersPage from './pages/OrdersPage';
 import ProfilePage from './pages/ProfilePage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import WishlistPage from './pages/WishlistPage';
+import ContactPage from './pages/ContactPage';
+import ShippingPolicyPage from './pages/ShippingPolicyPage';
+import ReturnsPage from './pages/ReturnsPage';
 import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
 import api from './api/client';
@@ -123,6 +126,9 @@ const App: React.FC = () => {
                 <Route path="profile" element={<ProfilePage user={user} />} />
                 <Route path="admin" element={<AdminDashboardPage />} />
                 <Route path="wishlist" element={<WishlistPage />} />
+                <Route path="contact" element={<ContactPage />} />
+                <Route path="shipping-policy" element={<ShippingPolicyPage />} />
+                <Route path="returns" element={<ReturnsPage />} />
                 <Route path="*" element={<div className="p-12 text-center text-slate-600 font-semibold text-lg">404 - Page Not Found</div>} />
               </Route>
             </Routes>
